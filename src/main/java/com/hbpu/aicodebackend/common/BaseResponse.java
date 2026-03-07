@@ -1,6 +1,7 @@
 package com.hbpu.aicodebackend.common;
 
 import com.hbpu.aicodebackend.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serial;import java.io.Serializable;
@@ -10,25 +11,30 @@ import java.io.Serial;import java.io.Serializable;
  *
  * @param <T>
  */
+@Schema(description = "通过响应类")
 @Data
 public class BaseResponse<T> implements Serializable {
 
+    @Schema(hidden = true)
     @Serial
     private static final long serialVersionUID = -2362061265069665413L;
 
     /**
      * 状态码
      */
+    @Schema(description = "状态码")
     private int code;
 
     /**
      * 数据
      */
+    @Schema(description = "数据")
     private T data;
 
     /**
      * 提示信息
      */
+    @Schema(description = "提示信息")
     private String message;
 
     /**
