@@ -1,4 +1,4 @@
-package com.hbpu.aicodebackend.model.dto;
+package com.hbpu.aicodebackend.model.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -7,13 +7,13 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 用户登录请求
+ * 用户注册请求
  *
  * @author Kefan
  */
 @Schema
 @Data
-public class UserLoginRequest implements Serializable {
+public class UserRegisterRequest implements Serializable {
 
     @Schema(hidden = true)
     @Serial
@@ -30,4 +30,10 @@ public class UserLoginRequest implements Serializable {
      */
     @Schema(description = "密码")
     private String userPassword;
+
+    /**
+     * 确认密码
+     */
+    @Schema(description = "确认密码")
+    private String checkPassword;
 }

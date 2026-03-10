@@ -7,7 +7,7 @@ import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.exception.ThrowUtils;
 import com.hbpu.aicodebackend.mapper.UserMapper;
-import com.hbpu.aicodebackend.model.dto.UserQueryRequest;
+import com.hbpu.aicodebackend.model.dto.user.UserQueryRequest;
 import com.hbpu.aicodebackend.model.entity.User;
 import com.hbpu.aicodebackend.model.enums.UserRoleEnum;
 import com.hbpu.aicodebackend.model.vo.LoginUserVO;

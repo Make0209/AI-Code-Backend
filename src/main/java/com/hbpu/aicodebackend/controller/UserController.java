@@ -9,7 +9,7 @@ import com.hbpu.aicodebackend.constant.UserConstant;
 import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.exception.ThrowUtils;
-import com.hbpu.aicodebackend.model.dto.*;
+import com.hbpu.aicodebackend.model.dto.user.*;
 import com.hbpu.aicodebackend.model.vo.LoginUserVO;
 import com.hbpu.aicodebackend.model.vo.UserVO;
 import com.mybatisflex.core.paginate.Page;

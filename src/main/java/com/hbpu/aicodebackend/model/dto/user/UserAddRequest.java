@@ -1,4 +1,4 @@
-package com.hbpu.aicodebackend.model.dto;
+package com.hbpu.aicodebackend.model.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

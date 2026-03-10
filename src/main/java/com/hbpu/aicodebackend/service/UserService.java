@@ -1,6 +1,6 @@
 package com.hbpu.aicodebackend.service;
 
-import com.hbpu.aicodebackend.model.dto.UserQueryRequest;
+import com.hbpu.aicodebackend.model.dto.user.UserQueryRequest;
 import com.hbpu.aicodebackend.model.vo.LoginUserVO;
 import com.hbpu.aicodebackend.model.vo.UserVO;
 import com.mybatisflex.core.query.QueryWrapper;

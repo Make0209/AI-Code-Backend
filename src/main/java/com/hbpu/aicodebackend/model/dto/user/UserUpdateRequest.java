@@ -1,26 +1,23 @@
-package com.hbpu.aicodebackend.model.dto;
+package com.hbpu.aicodebackend.model.dto.user;
 
-import com.hbpu.aicodebackend.common.PageRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 用户查询请求
+ * 用户更新请求
  *
  * @author Kefan
  */
-@Schema(description = "用户查询请求")
-@EqualsAndHashCode(callSuper = true)
+@Schema(description = "用户更新请求")
 @Data
-public class UserQueryRequest extends PageRequest implements Serializable {
+public class UserUpdateRequest implements Serializable {
 
     @Schema(hidden = true)
     @Serial
-    private static final long serialVersionUID = 6792526263075399737L;
+    private static final long serialVersionUID = 2591821889604272015L;
 
     /**
      * id
@@ -35,10 +32,10 @@ public class UserQueryRequest extends PageRequest implements Serializable {
     private String userName;
 
     /**
-     * 账号
+     * 用户头像
      */
-    @Schema(description = "账号")
-    private String userAccount;
+    @Schema(description = "用户头像")
+    private String userAvatar;
 
     /**
      * 简介
@@ -47,9 +44,9 @@ public class UserQueryRequest extends PageRequest implements Serializable {
     private String userProfile;
 
     /**
-     * 用户角色：user/admin/ban
+     * 用户角色：user/admin
      */
-    @Schema(description = "用户角色：user/admin/ban")
+    @Schema(description = "用户角色：user/admin")
     private String userRole;
 
 
