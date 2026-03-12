@@ -42,7 +42,7 @@ public interface AppService extends IService<App> {
     List<AppVO> getAppVOList(List<App> appList);
 
     /**
-     * 聊天生成代码
+     * 聊天生成代码 (已支持保存到历史聊天记录)
      *
      * @param appId     应用id
      * @param message   消息
