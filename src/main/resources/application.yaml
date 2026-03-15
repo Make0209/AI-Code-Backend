@@ -25,7 +25,9 @@ langchain4j:
       port: 6379
       password: 1234
       ttl: 3600
-
+  open-ai:
+    chat-model:
+      timeout: 600s
 #    服务器配置
 server:
   port: 8123

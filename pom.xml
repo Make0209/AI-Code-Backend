@@ -140,12 +140,20 @@
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai</artifactId>
             <version>1.12.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>dev.langchain4j</groupId>
+                    <artifactId>langchain4j-http-client-jdk</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--    langchain4j Spring Boot启动器    -->
+        <!-- Source: https://mvnrepository.com/artifact/dev.langchain4j/langchain4j-open-ai-spring-boot-starter -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
-            <version>1.12.1-beta21</version>
+            <version>1.12.2-beta22</version>
+            <scope>test</scope>
         </dependency>
         <!--    langchain4j 核心依赖    -->
         <dependency>
@@ -171,7 +179,7 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-community-redis-spring-boot-starter</artifactId>
-            <version>1.12.2-beta22</version>
+            <version>1.12.1-beta21</version>
             <scope>compile</scope>
         </dependency>
 
