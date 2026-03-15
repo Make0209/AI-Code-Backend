@@ -1,6 +1,7 @@
 package com.hbpu.aicodebackend.core;
 
 import com.hbpu.aicodebackend.ai.AiCodeGeneratorService;
+import com.hbpu.aicodebackend.ai.AiCodeGeneratorServiceFactory;
 import com.hbpu.aicodebackend.ai.model.HtmlCodeResult;
 import com.hbpu.aicodebackend.ai.model.MultiFileCodeResult;
 import com.hbpu.aicodebackend.core.parser.CodeParserExecutor;
@@ -23,7 +24,7 @@ import java.io.File;
 public class AiCodeGeneratorFacade {
 
     @Resource
-    private AiCodeGeneratorService aiCodeGeneratorService;
+    private AiCodeGeneratorServiceFactory aiCodeFactory;
 
     /**
      * 统一入口：根据类型生成并保存代码（使用 appId）
@@ -36,6 +37,7 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成类型为空");
         }
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeFactory.getAiCodeGeneratorService(appId);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 HtmlCodeResult result = aiCodeGeneratorService.generateHtmlCode(userMessage);
@@ -63,6 +65,7 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成类型为空");
         }
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeFactory.getAiCodeGeneratorService(appId);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 Flux<String> codeStream = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);

@@ -166,6 +166,28 @@
             <scope>test</scope>
         </dependency>
 
+        <!--    LangChain4j 通过Redis实现AI聊天上下文持久化    -->
+        <!-- Source: https://mvnrepository.com/artifact/dev.langchain4j/langchain4j-community-redis-spring-boot-starter -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-community-redis-spring-boot-starter</artifactId>
+            <version>1.12.2-beta22</version>
+            <scope>compile</scope>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>dev.langchain4j</groupId>-->
+<!--            <artifactId>langchain4j-community-redis-spring-boot-starter</artifactId>-->
+<!--            <version>1.1.0-beta7</version>-->
+<!--        </dependency>-->
+
+
+        <!--    caffeine 本地缓存    -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
 
     </dependencies>
 

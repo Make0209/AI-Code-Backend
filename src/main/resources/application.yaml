@@ -14,9 +14,18 @@ spring:
       host: localhost
       port: 6379
       password: 1234
-#  开启本地配置文件
+  #  开启本地配置文件
   profiles:
     active: local
+  # LangChain4j 独立配置（部分新版本支持）
+langchain4j:
+  community:
+    redis:
+      host: localhost
+      port: 6379
+      password: 1234
+      ttl: 3600
+
 #    服务器配置
 server:
   port: 8123
