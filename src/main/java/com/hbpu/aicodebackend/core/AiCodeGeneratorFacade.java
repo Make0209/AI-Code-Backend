@@ -14,9 +14,7 @@ import com.hbpu.aicodebackend.core.saver.CodeFileSaverExecutor;
 import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.model.enums.CodeGenTypeEnum;
-import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.service.TokenStream;
-import dev.langchain4j.service.tool.ToolExecution;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -129,42 +127,38 @@ public class AiCodeGeneratorFacade {
      * @return Flux<String> 流式响应
      */
     private Flux<String> processTokenStream(TokenStream tokenStream) {
-        return Flux.create(sink -> {
-            tokenStream
-                    // 1. 处理正常的 AI 文本回复
-                    .onPartialResponse(partialResponse -> {
-                        AiResponseMessage msg = new AiResponseMessage(partialResponse);
-                        sink.next(JSONUtil.toJsonStr(msg));
-                    })
-                    // 2. 处理 AI 的思考过程（如果你不打算建 ThinkingResponseMessage，可以注释掉这段）
-                    .onPartialThinking(partialThinking -> {
-                        ThinkingResponseMessage msg = new ThinkingResponseMessage(partialThinking.text());
-                        sink.next(JSONUtil.toJsonStr(msg));
-                    })
-                    // 3. 工具即将执行（此时 AI 已经完整生成了工具调用参数）
-                    // 完美适配你的 ToolRequestMessage 构造函数
-                    .beforeToolExecution(beforeExecution -> {
-                        // beforeExecution.request() 返回完整的 ToolExecutionRequest
-                        ToolRequestMessage msg = new ToolRequestMessage(beforeExecution.request());
-                        sink.next(JSONUtil.toJsonStr(msg));
-                    })
-                    // 4. 工具执行完毕（此时本地方法已运行完毕并拿到 result）
-                    // 完美适配你的 ToolExecutedMessage 构造函数
-                    .onToolExecuted(toolExecution -> {
-                        ToolExecutedMessage msg = new ToolExecutedMessage(toolExecution);
-                        sink.next(JSONUtil.toJsonStr(msg));
-                    })
-                    // 5. 整个流式对话结束
-                    .onCompleteResponse(chatResponse -> {
-                        sink.complete();
-                    })
-                    // 6. 异常处理
-                    .onError(error -> {
-                        error.printStackTrace();
-                        sink.error(error);
-                    })
-                    // 必须调用 start 启动流
-                    .start();
-        });
+        return Flux.create(sink -> tokenStream
+                // 1. 处理正常的 AI 文本回复
+                .onPartialResponse(partialResponse -> {
+                    AiResponseMessage msg = new AiResponseMessage(partialResponse);
+                    sink.next(JSONUtil.toJsonStr(msg));
+                })
+                // 2. 处理 AI 的思考过程（如果你不打算建 ThinkingResponseMessage，可以注释掉这段）
+                .onPartialThinking(partialThinking -> {
+                    ThinkingResponseMessage msg = new ThinkingResponseMessage(partialThinking.text());
+                    sink.next(JSONUtil.toJsonStr(msg));
+                })
+                // 3. 工具即将执行（此时 AI 已经完整生成了工具调用参数）
+                // 完美适配你的 ToolRequestMessage 构造函数
+                .beforeToolExecution(beforeExecution -> {
+                    // beforeExecution.request() 返回完整的 ToolExecutionRequest
+                    ToolRequestMessage msg = new ToolRequestMessage(beforeExecution.request());
+                    sink.next(JSONUtil.toJsonStr(msg));
+                })
+                // 4. 工具执行完毕（此时本地方法已运行完毕并拿到 result）
+                // 完美适配你的 ToolExecutedMessage 构造函数
+                .onToolExecuted(toolExecution -> {
+                    ToolExecutedMessage msg = new ToolExecutedMessage(toolExecution);
+                    sink.next(JSONUtil.toJsonStr(msg));
+                })
+                // 5. 整个流式对话结束
+                .onCompleteResponse(chatResponse -> sink.complete())
+                // 6. 异常处理
+                .onError(error -> {
+                    log.error("流式处理出错: {}", error.getMessage());
+                    sink.error(error);
+                })
+                // 必须调用 start 启动流
+                .start());
     }
 }

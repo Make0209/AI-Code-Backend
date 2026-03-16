@@ -2,33 +2,31 @@ package com.hbpu.aicodebackend.config;
 
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
 
 @Configuration
-@ConfigurationProperties(prefix = "langchain4j.open-ai.chat-model")
-@Data
 public class ReasoningStreamingChatModelConfig {
 
+    @Value("${langchain4j.open-ai.chat-model.base-url}")
     private String baseUrl;
 
+    @Value("${langchain4j.open-ai.chat-model.api-key}")
     private String apiKey;
 
-    /**
-     * 推理流式模型（用于 Vue 项目生成，带工具调用）
-     */
-    @Bean
+    // 供工厂类注入判断
+    // 新增：是否是推理模型，yaml 里控制
+    @Value("${ai.reasoning.is-reasoning-model:false}")
+    private boolean isReasoningModel;
+
+    @Bean("reasoningStreamingChatModel")
     public StreamingChatModel reasoningStreamingChatModel() {
-        // 为了测试方便临时修改
-        final String modelName = "deepseek-chat";
-        final int maxTokens = 8192;
-        // 生产环境使用：
-        // final String modelName = "deepseek-reasoner";
-        // final int maxTokens = 32768;
+        final String modelName = isReasoningModel ? "deepseek-reasoner" : "deepseek-chat";
+        final int maxTokens = isReasoningModel ? 32768 : 8192;
         return OpenAiStreamingChatModel.builder()
                                        .apiKey(apiKey)
                                        .baseUrl(baseUrl)
@@ -39,4 +37,5 @@ public class ReasoningStreamingChatModelConfig {
                                        .logResponses(true)
                                        .build();
     }
+
 }

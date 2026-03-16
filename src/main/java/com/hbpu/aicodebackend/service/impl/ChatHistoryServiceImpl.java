@@ -18,7 +18,7 @@ import com.hbpu.aicodebackend.mapper.ChatHistoryMapper;
 import com.hbpu.aicodebackend.service.ChatHistoryService;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.memory.chat.MessageWindowChatMemory;
+import dev.langchain4j.memory.ChatMemory;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -34,7 +34,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatHistory>  implements ChatHistoryService{
+public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatHistory> implements ChatHistoryService {
 
     @Resource
     @Lazy
@@ -64,6 +64,7 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
     public boolean deleteByAppId(Long appId) {
         ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用ID不能为空");
         QueryWrapper queryWrapper = QueryWrapper.create()
+                                                .from(ChatHistory.class)
                                                 .eq("appId", appId);
         return this.remove(queryWrapper);
     }
@@ -71,7 +72,8 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
 
     @Override
     public QueryWrapper getQueryWrapper(ChatHistoryQueryRequest chatHistoryQueryRequest) {
-        QueryWrapper queryWrapper = QueryWrapper.create();
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                                                .from(ChatHistory.class);
         if (chatHistoryQueryRequest == null) {
             return queryWrapper;
         }
@@ -126,10 +128,11 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
     }
 
     @Override
-    public int loadChatHistoryToMemory(Long appId, MessageWindowChatMemory chatMemory, int maxCount) {
+    public int loadChatHistoryToMemory(Long appId, ChatMemory chatMemory, int maxCount) {
         try {
             // 直接构造查询条件，起始点为 1 而不是 0，用于排除最新的用户消息
             QueryWrapper queryWrapper = QueryWrapper.create()
+                                                    .from(ChatHistory.class)
                                                     .eq(ChatHistory::getAppId, appId)
                                                     .orderBy(ChatHistory::getCreateTime, false)
                                                     .limit(1, maxCount);

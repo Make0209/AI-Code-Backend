@@ -3,6 +3,7 @@ package com.hbpu.aicodebackend.ai;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.hbpu.aicodebackend.ai.tools.FileWriteTool;
+import com.hbpu.aicodebackend.config.ReasoningStreamingChatModelConfig;
 import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.model.enums.CodeGenTypeEnum;
@@ -15,7 +16,6 @@ import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.service.AiServices;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
@@ -28,7 +28,7 @@ public class AiCodeGeneratorServiceFactory {
     private ChatModel chatModel;
 
     @Resource(name = "openAiStreamingChatModel")
-    private StreamingChatModel openAIStreamingChatModel;
+    private StreamingChatModel openAiStreamingChatModel;
 
     @Resource(name = "reasoningStreamingChatModel")
     private StreamingChatModel reasoningStreamingChatModel;
@@ -39,22 +39,21 @@ public class AiCodeGeneratorServiceFactory {
     @Resource
     private ChatHistoryService chatHistoryService;
 
-
     /**
      * AI 服务实例缓存
      */
     private final Cache<String, AiCodeGeneratorService> serviceCache = Caffeine.newBuilder()
-                                   .maximumSize(1000)
-                                   .expireAfterWrite(Duration.ofMinutes(30))
-                                   .expireAfterAccess(
-                                           Duration.ofMinutes(10))
-                                   .removalListener((key, value, cause) -> {
-                                       log.debug(
-                                               "AI 服务实例被移除，缓存键: {}, 原因: {}",
-                                               key, cause
-                                       );
-                                   })
-                                   .build();
+                                                                               .maximumSize(1000)
+                                                                               .expireAfterWrite(Duration.ofMinutes(30))
+                                                                               .expireAfterAccess(
+                                                                                       Duration.ofMinutes(10))
+                                                                               .removalListener((key, value, cause) -> {
+                                                                                   log.debug(
+                                                                                           "AI 服务实例被移除，缓存键: {}, 原因: {}",
+                                                                                           key, cause
+                                                                                   );
+                                                                               })
+                                                                               .build();
 
     /**
      * 根据 appId 获取服务（带缓存）这个方法是为了兼容历史逻辑
@@ -116,7 +115,7 @@ public class AiCodeGeneratorServiceFactory {
             // HTML 和多文件生成使用默认模型
             case HTML, MULTI_FILE -> AiServices.builder(AiCodeGeneratorService.class)
                                                .chatModel(chatModel)
-                                               .streamingChatModel(openAIStreamingChatModel)
+                                               .streamingChatModel(openAiStreamingChatModel)
                                                .chatMemory(chatMemory)
                                                .build();
             default -> throw new BusinessException(
