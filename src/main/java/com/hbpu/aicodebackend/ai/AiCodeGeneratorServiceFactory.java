@@ -20,6 +20,9 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
 
+/**
+ * AI 代码生成器服务工厂类
+ */
 @Configuration
 @Slf4j
 public class AiCodeGeneratorServiceFactory {
@@ -79,11 +82,11 @@ public class AiCodeGeneratorServiceFactory {
 
 
     /**
-     * 创建 AI 服务实例
+     * 根据应用程序的 ID 和代码生成类型创建 AI 代码生成器服务
      *
      * @param appId       应用程序的 ID
      * @param codeGenType 代码生成类型
-     * @return AI 服务实例
+     * @return AI 代码生成器服务实例
      */
     private AiCodeGeneratorService createAiCodeGeneratorService(long appId, CodeGenTypeEnum codeGenType) {
         // 根据 appId 构建独立的对话记忆

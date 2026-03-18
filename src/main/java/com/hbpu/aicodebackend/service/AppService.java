@@ -1,5 +1,6 @@
 package com.hbpu.aicodebackend.service;
 
+import com.hbpu.aicodebackend.model.dto.app.AppAddRequest;
 import com.hbpu.aicodebackend.model.dto.app.AppQueryRequest;
 import com.hbpu.aicodebackend.model.entity.User;
 import com.hbpu.aicodebackend.model.vo.AppVO;
@@ -16,6 +17,15 @@ import java.util.List;
  * @author <a href="https://github.com/Make0209">Kefan</a>
  */
 public interface AppService extends IService<App> {
+
+    /**
+     * 创建应用
+     *
+     * @param appAddRequest 应用添加请求
+     * @param loginUser     登录用户
+     * @return 应用id
+     */
+    Long createApp(AppAddRequest appAddRequest, User loginUser);
 
     /**
      * 获取应用VO
@@ -59,4 +69,12 @@ public interface AppService extends IService<App> {
      * @return 部署结果
      */
     String deployApp(Long appId, User loginUser);
+
+    /**
+     * 生成应用截图(异步)
+     *
+     * @param appId   应用id
+     * @param appUrl  应用地址
+     */
+    void generateAppScreenshotAsync(Long appId, String appUrl);
 }
