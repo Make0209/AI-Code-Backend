@@ -15,9 +15,13 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
@@ -26,99 +30,104 @@ import java.util.UUID;
  * 网页截图工具类，使用 Chrome 浏览器进行网页截图。
  */
 @Slf4j
+@Component
 public class WebScreenshotUtils {
 
-    private static final WebDriver webDriver;
+    private WebDriver webDriver;
+    private final Object lock = new Object();
 
-    static {
-        final int DEFAULT_WIDTH = 1600;
-        final int DEFAULT_HEIGHT = 900;
-        webDriver = initChromeDriver(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    // ✅ 懒加载，第一次用的时候才初始化，失败了不影响其他功能
+    private WebDriver getDriver() {
+        if (webDriver == null) {
+            synchronized (lock) {
+                if (webDriver == null) {
+                    webDriver = initEdgeDriver(1600, 900);
+                }
+            }
+        }
+        return webDriver;
     }
 
-    @PreDestroy
-    public void destroy() {
-        webDriver.quit();
-    }
-
-    /**
-     * 生成网页截图
-     *
-     * @param webUrl 网页URL
-     * @return 压缩后的截图文件路径，失败返回null
-     */
-    public static String saveWebPageScreenshot(String webUrl) {
+    // ✅ 改成实例方法
+    public String saveWebPageScreenshot(String webUrl) {
         if (StrUtil.isBlank(webUrl)) {
             log.error("网页URL不能为空");
             return null;
         }
         try {
-            // 创建临时目录
-            String rootPath = System.getProperty("user.dir") + File.separator + "tmp" + File.separator + "screenshots"
+            String rootPath = System.getProperty("user.dir") + File.separator + "tmp"
+                    + File.separator + "screenshots"
                     + File.separator + UUID.randomUUID().toString().substring(0, 8);
             FileUtil.mkdir(rootPath);
-            // 图片后缀
             final String IMAGE_SUFFIX = ".png";
-            // 原始截图文件路径
             String imageSavePath = rootPath + File.separator + RandomUtil.randomNumbers(5) + IMAGE_SUFFIX;
-            // 访问网页
-            webDriver.get(webUrl);
-            // 等待页面加载完成
-            waitForPageLoad(webDriver);
-            // 截图
-            byte[] screenshotBytes = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);
-            // 保存原始图片
+
+            WebDriver driver = getDriver();  // ✅ 懒加载获取
+            driver.get(webUrl);
+            waitForPageLoad(driver);
+            byte[] screenshotBytes = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
             saveImage(screenshotBytes, imageSavePath);
             log.info("原始截图保存成功: {}", imageSavePath);
-            // 压缩图片
+
             final String COMPRESSION_SUFFIX = "_compressed.jpg";
             String compressedImagePath = rootPath + File.separator + RandomUtil.randomNumbers(5) + COMPRESSION_SUFFIX;
             compressImage(imageSavePath, compressedImagePath);
             log.info("压缩图片保存成功: {}", compressedImagePath);
-            // 删除原始图片，只保留压缩图片
+
             FileUtil.del(imageSavePath);
             return compressedImagePath;
         } catch (Exception e) {
             log.error("网页截图失败: {}", webUrl, e);
+            // ✅ 截图失败就重置 driver，下次重新初始化
+            resetDriver();
             return null;
         }
     }
 
+    // ✅ @PreDestroy 现在真的有效了
+    @PreDestroy
+    public void destroy() {
+        if (webDriver != null) {
+            try {
+                webDriver.quit();
+                log.info("Chrome WebDriver 已关闭");
+            } catch (Exception e) {
+                log.warn("关闭 WebDriver 时出现异常", e);
+            }
+        }
+    }
 
-    /**
-     * 初始化 Chrome 浏览器驱动
-     */
-    private static WebDriver initChromeDriver(int width, int height) {
+    private void resetDriver() {
         try {
-            // 自动管理 ChromeDriver
-            WebDriverManager.chromedriver().setup();
-            // 配置 Chrome 选项
-            ChromeOptions options = new ChromeOptions();
-            // 无头模式
+            if (webDriver != null) webDriver.quit();
+        } catch (Exception ignored) {}
+        webDriver = null;
+    }
+
+    private WebDriver initEdgeDriver(int width, int height) {
+        try {
+            // ✅ Edge 驱动从微软服务器下载，国内直接能访问，不需要镜像
+            WebDriverManager.edgedriver().setup();
+
+            EdgeOptions options = new EdgeOptions();
             options.addArguments("--headless");
-            // 禁用GPU（在某些环境下避免问题）
             options.addArguments("--disable-gpu");
-            // 禁用沙盒模式（Docker环境需要）
             options.addArguments("--no-sandbox");
-            // 禁用开发者shm使用
             options.addArguments("--disable-dev-shm-usage");
-            // 设置窗口大小
             options.addArguments(String.format("--window-size=%d,%d", width, height));
-            // 禁用扩展
             options.addArguments("--disable-extensions");
-            // 设置用户代理
             options.addArguments(
-                    "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-            // 创建驱动
-            WebDriver driver = new ChromeDriver(options);
-            // 设置页面加载超时
+                    "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0"
+            );
+
+            WebDriver driver = new EdgeDriver(options);
             driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
-            // 设置隐式等待
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+            log.info("Edge WebDriver 初始化成功");
             return driver;
         } catch (Exception e) {
-            log.error("初始化 Chrome 浏览器失败", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "初始化 Chrome 浏览器失败");
+            log.error("初始化 Edge 浏览器失败", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "初始化 Edge 浏览器失败");
         }
     }
 
