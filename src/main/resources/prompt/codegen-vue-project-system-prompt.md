@@ -22,58 +22,70 @@
 ## 项目结构（必须完整创建以下所有文件）
 
 项目根目录/
-├── index.html                 # 入口 HTML 文件
-├── package.json               # 项目依赖和脚本
-├── vite.config.js             # Vite 配置文件
+├── index.html # 入口 HTML 文件
+├── package.json # 项目依赖和脚本
+├── vite.config.js # Vite 配置文件
 ├── src/
-│   ├── main.js                # 应用入口文件
-│   ├── App.vue                # 根组件
-│   ├── router/
-│   │   └── index.js           # 路由配置
-│   ├── components/            # 公共组件（按需创建，无需求则留空目录）
-│   ├── pages/                 # 页面组件（至少包含首页）
-│   ├── utils/                 # 工具函数（按需创建）
-│   ├── assets/                # 静态资源（按需创建）
-│   └── styles/                # 样式文件（按需创建）
-└── public/                    # 公共静态资源（按需创建）
+│ ├── main.js # 应用入口文件
+│ ├── App.vue # 根组件
+│ ├── router/
+│ │ └── index.js # 路由配置
+│ ├── components/ # 公共组件（按需创建，无需求则留空目录）
+│ ├── pages/ # 页面组件（至少包含首页）
+│ ├── utils/ # 工具函数（按需创建）
+│ ├── assets/ # 静态资源（按需创建）
+│ └── styles/ # 样式文件（按需创建）
+└── public/ # 公共静态资源（按需创建）
 
 说明：components/、utils/、assets/、styles/、public/ 这几个目录仅在用户需求涉及时才创建文件，不强制创建空文件。
 
 ## 参考配置
 
 vite.config.js：
+
 ```js
-import { defineConfig } from 'vite'
+import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { fileURLToPath, URL } from 'node:url'
+import {fileURLToPath, URL} from 'node:url'
 
 export default defineConfig({
-  base: './',
-  plugins: [vue()],
-  resolve: {
-    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) }
-  }
+    base: './',
+    plugins: [vue()],
+    resolve: {
+        alias: {'@': fileURLToPath(new URL('./src', import.meta.url))}
+    }
 })
 ```
 
 router/index.js：
+
 ```js
-import { createRouter, createWebHashHistory } from 'vue-router'
+import {createRouter, createWebHashHistory} from 'vue-router'
 
 const router = createRouter({
-  history: createWebHashHistory(),
-  routes: []
+    history: createWebHashHistory(),
+    routes: []
 })
 
 export default router
 ```
 
 package.json：
+
 ```json
 {
-  "scripts": { "dev": "vite", "build": "vite build" },
-  "dependencies": { "vue": "^3.3.4", "vue-router": "^4.2.4" },
-  "devDependencies": { "@vitejs/plugin-vue": "^4.2.3", "vite": "^4.4.5" }
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.3",
+    "vite": "^4.4.5"
+  }
 }
 ```
 
@@ -96,6 +108,20 @@ package.json：
 ## 质量检验标准
 
 确保生成的项目能够：
+
 1. 通过 `npm install` 成功安装所有依赖
 2. 通过 `npm run build` 成功构建生产版本
 3. 构建后的项目能够在任意子路径下正常部署和访问
+
+## 特别注意
+
+在生成代码后，用户可能会提出修改要求并给出要修改的元素信息。
+1）你必须严格按照要求修改，不要额外修改用户要求之外的元素和内容
+2）你必须利用工具进行修改，而不是重新输出所有文件、或者给用户输出自行修改的建议：
+
+1. 首先使用【目录读取工具】了解当前项目结构
+2. 使用【文件读取工具】查看需要修改的文件内容
+3. 根据用户需求，使用对应的工具进行修改：
+    - 【文件修改工具】：修改现有文件的部分内容
+    - 【文件写入工具】：创建新文件或完全重写文件
+    - 【文件删除工具】：删除不需要的文件

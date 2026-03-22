@@ -2,7 +2,7 @@ package com.hbpu.aicodebackend.ai;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.hbpu.aicodebackend.ai.tools.FileWriteTool;
+import com.hbpu.aicodebackend.ai.tools.ToolManager;
 import com.hbpu.aicodebackend.config.ReasoningStreamingChatModelConfig;
 import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
@@ -41,6 +41,8 @@ public class AiCodeGeneratorServiceFactory {
 
     @Resource
     private ChatHistoryService chatHistoryService;
+    @Resource
+    private ToolManager toolManager;
 
     /**
      * AI 服务实例缓存
@@ -107,7 +109,7 @@ public class AiCodeGeneratorServiceFactory {
                                           // 使用 chatMemoryProvider 而不是 chatMemory，因为需要根据 appId 获取不同的 chatMemory
                                           .chatMemoryProvider(memoryId -> chatMemory)
                                           // 添加文件写入工具，用于将生成的代码保存到文件中
-                                          .tools(new FileWriteTool())
+                                          .tools(toolManager.getAllToolsForLangChain())
                                           // 处理工具名称不存在的情况，返回错误信息给AI
                                           .hallucinatedToolNameStrategy(
                                                   toolExecutionRequest -> ToolExecutionResultMessage.from(
