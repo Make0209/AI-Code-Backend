@@ -219,7 +219,25 @@
             <artifactId>webdrivermanager</artifactId>
             <version>6.3.3</version>
         </dependency>
+
+        <!--  AI工作流 LangGraph4j 框架依赖  -->
+        <!-- Source: https://mvnrepository.com/artifact/org.bsc.langgraph4j/langgraph4j-core -->
+        <dependency>
+            <groupId>org.bsc.langgraph4j</groupId>
+            <artifactId>langgraph4j-core</artifactId>
+            <version>1.8.10</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- 阿里云 DashScope SDK -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dashscope-sdk-java</artifactId>
+            <version>2.21.1</version>
+        </dependency>
+
     </dependencies>
+
 
     <build>
         <plugins>

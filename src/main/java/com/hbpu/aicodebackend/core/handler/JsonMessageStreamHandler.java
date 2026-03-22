@@ -26,6 +26,9 @@ import reactor.core.publisher.Flux;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * 处理 JSON 格式的流消息
+ */
 @Slf4j
 @Component
 public class JsonMessageStreamHandler {
