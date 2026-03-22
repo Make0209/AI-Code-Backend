@@ -43,3 +43,6 @@ knife4j:
 ai:
   reasoning:
     is-reasoning-model: false   # true = deepseek-reasoner，false = deepseek-chat
+# mermaid配置
+mermaid:
+  puppeteer-config-path: D:\IDEAProject\AICodeBackend\puppeteer-config.json

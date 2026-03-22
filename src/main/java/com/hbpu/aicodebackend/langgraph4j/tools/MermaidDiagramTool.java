@@ -14,6 +14,7 @@ import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -27,6 +28,8 @@ public class MermaidDiagramTool {
 
     @Resource
     private CosManager cosManager;
+    @Value("${mermaid.puppeteer-config-path:}")
+    private String puppeteerConfigPath;
 
     @Tool("将 Mermaid 代码转换为架构图图片，用于展示系统结构和技术关系")
     public List<ImageResource> generateMermaidDiagram(@P("Mermaid 图表代码") String mermaidCode,
@@ -70,12 +73,11 @@ public class MermaidDiagramTool {
         // 根据操作系统选择命令
         String command = SystemUtil.getOsInfo().isWindows() ? "mmdc.cmd" : "mmdc";
         // 构建命令
-        String cmdLine = String.format(
-                "%s -i %s -o %s -b transparent",
-                command,
-                tempInputFile.getAbsolutePath(),
-                tempOutputFile.getAbsolutePath()
-        );
+        String cmdLine = StrUtil.isNotBlank(puppeteerConfigPath)
+                ? String.format("%s -i %s -o %s -b transparent -p %s",
+                                command, tempInputFile.getAbsolutePath(), tempOutputFile.getAbsolutePath(), puppeteerConfigPath)
+                : String.format("%s -i %s -o %s -b transparent",
+                                command, tempInputFile.getAbsolutePath(), tempOutputFile.getAbsolutePath());
         // 执行命令
         RuntimeUtil.execForStr(cmdLine);
         // 检查输出文件
