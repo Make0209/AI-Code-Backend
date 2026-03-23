@@ -4,6 +4,7 @@ import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.langgraph4j.node.*;
 import com.hbpu.aicodebackend.langgraph4j.state.WorkflowContext;
+import com.hbpu.aicodebackend.model.enums.CodeGenTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.langgraph4j.CompiledGraph;
 import org.bsc.langgraph4j.GraphRepresentation;
@@ -16,7 +17,11 @@ import java.util.Map;
 
 import static org.bsc.langgraph4j.GraphDefinition.END;
 import static org.bsc.langgraph4j.GraphDefinition.START;
+import static org.bsc.langgraph4j.action.AsyncEdgeAction.edge_async;
 
+/**
+ * 代码生成工作流
+ */
 @Slf4j
 public class CodeGenWorkflow {
 
@@ -38,7 +43,16 @@ public class CodeGenWorkflow {
                     .addEdge("image_collector", "prompt_enhancer")
                     .addEdge("prompt_enhancer", "router")
                     .addEdge("router", "code_generator")
-                    .addEdge("code_generator", "project_builder")
+                    .addEdge("router", "code_generator")
+                    // 使用条件边：根据代码生成类型决定是否需要构建
+                    .addConditionalEdges(
+                            "code_generator",
+                            edge_async(this::routeBuildOrSkip),
+                            Map.of(
+                                    "build", "project_builder",  // 需要构建的情况
+                                    "skip_build", END             // 跳过构建直接结束
+                            )
+                    )
                     .addEdge("project_builder", END)
 
                     // 编译工作流
@@ -80,4 +94,19 @@ public class CodeGenWorkflow {
         log.info("代码生成工作流执行完成！");
         return finalContext;
     }
+
+    /**
+     * 根据代码生成类型决定是否需要构建
+     */
+    private String routeBuildOrSkip(MessagesState<String> state) {
+        WorkflowContext context = WorkflowContext.getContext(state);
+        CodeGenTypeEnum generationType = context.getGenerationType();
+        // HTML 和 MULTI_FILE 类型不需要构建，直接结束
+        if (generationType == CodeGenTypeEnum.HTML || generationType == CodeGenTypeEnum.MULTI_FILE) {
+            return "skip_build";
+        }
+        // VUE_PROJECT 需要构建
+        return "build";
+    }
+
 }

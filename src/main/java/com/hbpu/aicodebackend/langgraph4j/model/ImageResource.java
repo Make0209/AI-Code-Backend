@@ -1,5 +1,6 @@
-package com.hbpu.aicodebackend.langgraph4j.state;
+package com.hbpu.aicodebackend.langgraph4j.model;
 
+import com.hbpu.aicodebackend.langgraph4j.model.enums.ImageCategoryEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

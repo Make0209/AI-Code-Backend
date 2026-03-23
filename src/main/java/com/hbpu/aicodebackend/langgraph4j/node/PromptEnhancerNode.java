@@ -2,7 +2,7 @@ package com.hbpu.aicodebackend.langgraph4j.node;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.hbpu.aicodebackend.langgraph4j.state.ImageResource;
+import com.hbpu.aicodebackend.langgraph4j.model.ImageResource;
 import com.hbpu.aicodebackend.langgraph4j.state.WorkflowContext;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.langgraph4j.action.AsyncNodeAction;

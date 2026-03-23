@@ -1,4 +1,4 @@
-package com.hbpu.aicodebackend.langgraph4j.state;
+package com.hbpu.aicodebackend.langgraph4j.model.enums;
 
 import cn.hutool.core.util.ObjUtil;
 import lombok.Getter;
