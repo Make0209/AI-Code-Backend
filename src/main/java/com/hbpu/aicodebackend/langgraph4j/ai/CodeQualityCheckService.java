@@ -1,0 +1,19 @@
+package com.hbpu.aicodebackend.langgraph4j.ai;
+
+import com.hbpu.aicodebackend.langgraph4j.model.QualityResult;
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+
+/**
+ * 代码质量检查服务
+ */
+public interface CodeQualityCheckService {
+
+    /**
+     * 检查代码质量，AI 会分析代码并返回质量检查结果
+     * @param codeContent 代码内容
+     * @return 质量检查结果
+     */
+    @SystemMessage(fromResource = "prompt/code-quality-check-system-prompt.md")
+    QualityResult checkCodeQuality(@UserMessage String codeContent);
+}
