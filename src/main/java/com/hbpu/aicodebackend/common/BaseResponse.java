@@ -3,6 +3,7 @@ package com.hbpu.aicodebackend.common;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serial;import java.io.Serializable;
 
@@ -13,6 +14,7 @@ import java.io.Serial;import java.io.Serializable;
  */
 @Schema(description = "通过响应类")
 @Data
+@NoArgsConstructor
 public class BaseResponse<T> implements Serializable {
 
     @Schema(hidden = true)

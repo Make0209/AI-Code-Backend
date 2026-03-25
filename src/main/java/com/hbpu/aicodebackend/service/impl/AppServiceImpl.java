@@ -5,7 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import com.hbpu.aicodebackend.ai.AiCodeGenTypeRoutingService;
+import com.hbpu.aicodebackend.ai.AiCodeGenTypeRoutingServiceFactory;
 import com.hbpu.aicodebackend.ai.model.CodeGenRoutingResult;
 import com.hbpu.aicodebackend.constant.AppConstant;
 import com.hbpu.aicodebackend.core.AiCodeGeneratorFacade;
@@ -14,21 +14,21 @@ import com.hbpu.aicodebackend.core.handler.StreamHandlerExecutor;
 import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.exception.ThrowUtils;
+import com.hbpu.aicodebackend.mapper.AppMapper;
 import com.hbpu.aicodebackend.model.dto.app.AppAddRequest;
 import com.hbpu.aicodebackend.model.dto.app.AppQueryRequest;
+import com.hbpu.aicodebackend.model.entity.App;
 import com.hbpu.aicodebackend.model.entity.User;
 import com.hbpu.aicodebackend.model.enums.ChatHistoryMessageTypeEnum;
 import com.hbpu.aicodebackend.model.enums.CodeGenTypeEnum;
 import com.hbpu.aicodebackend.model.vo.AppVO;
 import com.hbpu.aicodebackend.model.vo.UserVO;
+import com.hbpu.aicodebackend.service.AppService;
 import com.hbpu.aicodebackend.service.ChatHistoryService;
 import com.hbpu.aicodebackend.service.ScreenshotService;
 import com.hbpu.aicodebackend.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import com.hbpu.aicodebackend.model.entity.App;
-import com.hbpu.aicodebackend.mapper.AppMapper;
-import com.hbpu.aicodebackend.service.AppService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -72,7 +72,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     private ScreenshotService screenshotService;
 
     @Resource
-    private AiCodeGenTypeRoutingService aiCodeGenTypeRoutingService;
+    private AiCodeGenTypeRoutingServiceFactory aiCodeGenTypeRoutingServiceFactory;
 
     @Override
     public Long createApp(AppAddRequest appAddRequest, User loginUser) {
@@ -84,7 +84,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         BeanUtil.copyProperties(appAddRequest, app);
         app.setUserId(loginUser.getId());
         // 使用 AI 智能选择代码生成类型
-        CodeGenRoutingResult codeGenRoutingResult = aiCodeGenTypeRoutingService.routeCodeGenType(initPrompt);
+        CodeGenRoutingResult codeGenRoutingResult = aiCodeGenTypeRoutingServiceFactory.createAiCodeGenTypeRoutingService().routeCodeGenType(initPrompt);
         // 通过 AI 回答的结果获取应用名称
         app.setAppName(codeGenRoutingResult.projectName());
         // 通过 AI 回答的结果获取代码生成类型
