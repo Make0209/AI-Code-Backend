@@ -34,9 +34,6 @@ import java.util.Set;
 public class JsonMessageStreamHandler {
 
     @Resource
-    private VueProjectBuilder vueProjectBuilder;
-
-    @Resource
     private ToolManager toolManager;
 
     public Flux<String> handle(Flux<String> originFlux,
@@ -56,8 +53,6 @@ public class JsonMessageStreamHandler {
                             ChatHistoryMessageTypeEnum.AI.getValue(),
                             loginUser.getId()
                     );
-                    String projectPath = AppConstant.CODE_OUTPUT_ROOT_DIR + "/vue_project_" + appId;
-                    vueProjectBuilder.buildProjectAsync(projectPath);
                 })
                 .doOnError(error -> {
                     String errorMessage = "AI回复失败: " + error.getMessage();

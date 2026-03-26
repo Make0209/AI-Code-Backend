@@ -101,7 +101,7 @@ public class AiCodeGeneratorServiceFactory {
             case VUE_PROJECT -> {
                 // 采用多例模式解决并发问题
                 StreamingChatModel reasoningStreamingChatModelProtoType = SpringContextUtil.getBean(
-                        "reasoningStreamingChatModelProtoType", StreamingChatModel.class);
+                        "reasoningStreamingChatModelPrototype", StreamingChatModel.class);
                 yield AiServices.builder(AiCodeGeneratorService.class)
                                 // 使用推理流式模型
                                 .streamingChatModel(reasoningStreamingChatModelProtoType)
@@ -120,10 +120,16 @@ public class AiCodeGeneratorServiceFactory {
             // HTML 和多文件生成使用默认模型
             case HTML, MULTI_FILE -> {
                 StreamingChatModel streamingChatModelProtoType = SpringContextUtil.getBean(
-                        "streamingChatModelProtoType", StreamingChatModel.class);
+                        "streamingChatModelPrototype", StreamingChatModel.class);
                 yield AiServices.builder(AiCodeGeneratorService.class)
                                 .chatModel(chatModel)
                                 .streamingChatModel(streamingChatModelProtoType)
+//                                .tools(toolManager.getAllToolsForLangChain())
+//                                .hallucinatedToolNameStrategy(
+//                                        toolExecutionRequest -> ToolExecutionResultMessage.from(
+//                                                toolExecutionRequest,
+//                                                "Error: there is no tool called " + toolExecutionRequest.name()
+//                                        ))
                                 .chatMemory(chatMemory)
                                 .build();
             }
