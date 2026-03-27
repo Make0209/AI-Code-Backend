@@ -14,6 +14,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ *全局异常处理器
+ */
 @Hidden
 @RestControllerAdvice
 @Slf4j
@@ -61,10 +64,12 @@ public class GlobalExceptionHandler {
                 uri.contains("/chat/gen/code")) {
             try {
                 // 设置SSE响应头
-                response.setContentType("text/event-stream");
-                response.setCharacterEncoding("UTF-8");
-                response.setHeader("Cache-Control", "no-cache");
-                response.setHeader("Connection", "keep-alive");
+                if (response != null) {
+                    response.setContentType("text/event-stream");
+                    response.setCharacterEncoding("UTF-8");
+                    response.setHeader("Cache-Control", "no-cache");
+                    response.setHeader("Connection", "keep-alive");
+                }
                 // 构造错误消息的SSE格式
                 Map<String, Object> errorData = Map.of(
                         "error", true,
@@ -74,11 +79,13 @@ public class GlobalExceptionHandler {
                 String errorJson = JSONUtil.toJsonStr(errorData);
                 // 发送业务错误事件（避免与标准error事件冲突）
                 String sseData = "event: business-error\ndata: " + errorJson + "\n\n";
-                response.getWriter().write(sseData);
-                response.getWriter().flush();
-                // 发送结束事件
-                response.getWriter().write("event: done\ndata: {}\n\n");
-                response.getWriter().flush();
+                if (response != null) {
+                    response.getWriter().write(sseData);
+                    response.getWriter().flush();
+                    // 发送结束事件
+                    response.getWriter().write("event: done\ndata: {}\n\n");
+                    response.getWriter().flush();
+                }
                 // 表示已处理SSE请求
                 return true;
             } catch (IOException ioException) {

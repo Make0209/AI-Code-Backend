@@ -17,6 +17,8 @@ import com.hbpu.aicodebackend.model.dto.app.*;
 import com.hbpu.aicodebackend.model.entity.User;
 import com.hbpu.aicodebackend.model.enums.CodeGenTypeEnum;
 import com.hbpu.aicodebackend.model.vo.AppVO;
+import com.hbpu.aicodebackend.ratelimit.annotation.RateLimit;
+import com.hbpu.aicodebackend.ratelimit.enums.RateLimitType;
 import com.hbpu.aicodebackend.service.ProjectDownloadService;
 import com.hbpu.aicodebackend.service.UserService;
 import com.mybatisflex.core.paginate.Page;
@@ -321,6 +323,7 @@ public class AppController {
     })
     @Operation(summary = "应用聊天生成代码（流式 SSE）", description = "应用聊天生成代码（流式 SSE）")
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @RateLimit(limitType = RateLimitType.USER, rate = 5, rateInterval = 60, message = "AI 对话请求过于频繁，请稍后再试")
     public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam Long appId,
             @RequestParam String message,
             HttpServletRequest request) {

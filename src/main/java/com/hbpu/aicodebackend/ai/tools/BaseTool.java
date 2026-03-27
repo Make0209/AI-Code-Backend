@@ -14,12 +14,10 @@ public abstract class BaseTool {
     public abstract String getDisplayName();
 
     public String generateToolRequestResponse() {
-        return String.format(
-                "\n\n<div class=\"tool-status-loading\">\n" +
-                        "  <span class=\"spin-icon\">⚙️</span>\n" +
-                        "  <span class=\"status-text\">工具调用中...</span>\n" +
-                        "</div>\n\n"
-        );
+        return "\n\n<div class=\"tool-status-loading\">\n" +
+                "  <span class=\"spin-icon\">⚙️</span>\n" +
+                "  <span class=\"status-text\">工具调用中...</span>\n" +
+                "</div>\n\n";
     }
 
     public abstract String generateToolExecutedResult(JSONObject arguments, String result);
@@ -113,4 +111,5 @@ public abstract class BaseTool {
         }
         return normalize(structured.getStr("summary"), fallback);
     }
+
 }
