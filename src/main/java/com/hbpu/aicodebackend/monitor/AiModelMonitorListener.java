@@ -30,51 +30,55 @@ public class AiModelMonitorListener implements ChatModelListener {
 
     @Override
     public void onRequest(ChatModelRequestContext requestContext) {
-        // 记录请求开始时间
         requestContext.attributes().put(REQUEST_START_TIME_KEY, Instant.now());
-        // 从监控上下文中获取信息
         MonitorContext context = MonitorContextHolder.getContext();
-        String userId = context.getUserId();
-        String appId = context.getAppId();
+        // ✅ 修复1：防御性处理，避免 null 存入 attributes
+        if (context == null) {
+            log.warn("MonitorContext is null in onRequest, using default context. " +
+                             "Please call MonitorContextHolder.setContext() before invoking the model.");
+            context = MonitorContext.builder()
+                                    .userId("unknown")
+                                    .appId("unknown")
+                                    .build();
+        }
         requestContext.attributes().put(MONITOR_CONTEXT_KEY, context);
-        // 获取模型名称
         String modelName = requestContext.chatRequest().modelName();
-        // 记录请求指标
-        aiModelMetricsCollector.recordRequest(userId, appId, modelName, "started");
+        aiModelMetricsCollector.recordRequest(
+                context.getUserId(), context.getAppId(), modelName, "started");
     }
 
     @Override
     public void onResponse(ChatModelResponseContext responseContext) {
-        // 从属性中获取监控信息（由 onRequest 方法存储）
         Map<Object, Object> attributes = responseContext.attributes();
-        // 从监控上下文中获取信息
         MonitorContext context = (MonitorContext) attributes.get(MONITOR_CONTEXT_KEY);
+        // ✅ 修复2：onResponse 从 attributes 取（已在 onRequest 中存好），不再用 ThreadLocal
+        if (context == null) {
+            log.warn("MonitorContext is null in onResponse, skipping metrics recording.");
+            return;
+        }
         String userId = context.getUserId();
         String appId = context.getAppId();
-        // 获取模型名称
         String modelName = responseContext.chatResponse().modelName();
-        // 记录成功请求
         aiModelMetricsCollector.recordRequest(userId, appId, modelName, "success");
-        // 记录响应时间
         recordResponseTime(attributes, userId, appId, modelName);
-        // 记录 Token 使用情况
         recordTokenUsage(responseContext, userId, appId, modelName);
     }
 
     @Override
     public void onError(ChatModelErrorContext errorContext) {
-        // 从监控上下文中获取信息
-        MonitorContext context = MonitorContextHolder.getContext();
+        Map<Object, Object> attributes = errorContext.attributes();
+        // ✅ 修复3：onError 也从 attributes 取，不用 ThreadLocal（避免跨线程问题）
+        MonitorContext context = (MonitorContext) attributes.get(MONITOR_CONTEXT_KEY);
+        if (context == null) {
+            log.warn("MonitorContext is null in onError, skipping metrics recording.");
+            return;
+        }
         String userId = context.getUserId();
         String appId = context.getAppId();
-        // 获取模型名称和错误类型
         String modelName = errorContext.chatRequest().modelName();
         String errorMessage = errorContext.error().getMessage();
-        // 记录失败请求
         aiModelMetricsCollector.recordRequest(userId, appId, modelName, "error");
         aiModelMetricsCollector.recordError(userId, appId, modelName, errorMessage);
-        // 记录响应时间（即使是错误响应）
-        Map<Object, Object> attributes = errorContext.attributes();
         recordResponseTime(attributes, userId, appId, modelName);
     }
 
