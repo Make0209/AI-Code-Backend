@@ -23,6 +23,8 @@ import com.hbpu.aicodebackend.model.enums.ChatHistoryMessageTypeEnum;
 import com.hbpu.aicodebackend.model.enums.CodeGenTypeEnum;
 import com.hbpu.aicodebackend.model.vo.AppVO;
 import com.hbpu.aicodebackend.model.vo.UserVO;
+import com.hbpu.aicodebackend.monitor.MonitorContext;
+import com.hbpu.aicodebackend.monitor.MonitorContextHolder;
 import com.hbpu.aicodebackend.service.AppService;
 import com.hbpu.aicodebackend.service.ChatHistoryService;
 import com.hbpu.aicodebackend.service.ScreenshotService;
@@ -84,7 +86,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         BeanUtil.copyProperties(appAddRequest, app);
         app.setUserId(loginUser.getId());
         // 使用 AI 智能选择代码生成类型
-        CodeGenRoutingResult codeGenRoutingResult = aiCodeGenTypeRoutingServiceFactory.createAiCodeGenTypeRoutingService().routeCodeGenType(initPrompt);
+        CodeGenRoutingResult codeGenRoutingResult = aiCodeGenTypeRoutingServiceFactory.createAiCodeGenTypeRoutingService()
+                                                                                      .routeCodeGenType(initPrompt);
         // 通过 AI 回答的结果获取应用名称
         app.setAppName(codeGenRoutingResult.projectName());
         // 通过 AI 回答的结果获取代码生成类型
@@ -179,12 +182,22 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "不支持的代码生成类型");
         }
         // 5. 通过校验后，添加用户消息到对话历史
-        chatHistoryService.addChatMessage(appId, message, ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
-        // 6. 调用 AI 生成代码（流式）
+        chatHistoryService.addChatMessage(
+                appId, message, ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
+        // 6. 设置监控上下文
+        MonitorContextHolder.setContext(
+                MonitorContext.builder()
+                              .userId(loginUser.getId().toString())
+                              .appId(appId.toString())
+                              .build()
+        );
+        // 7. 调用 AI 生成代码（流式）
         Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
-        // 7. 收集AI响应内容并在完成后记录到对话历史
-        return streamHandlerExecutor.doExecute(
-                codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum);
+        // 8. 收集AI响应内容并在完成后记录到对话历史
+        return streamHandlerExecutor
+                .doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum)
+                .doFinally(signalType -> MonitorContextHolder.clearContext()
+                );
     }
 
     @Override

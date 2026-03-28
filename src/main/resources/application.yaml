@@ -1,14 +1,14 @@
 spring:
-#   应用名称
+  #   应用名称
   application:
     name: AICodeBackend
-#    MySQL配置
+  #    MySQL配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3307/ai_code
     username: root
     password: 1234
-#    Redis配置
+  #    Redis配置
   data:
     redis:
       host: localhost
@@ -40,9 +40,14 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
-ai:
-  reasoning:
-    is-reasoning-model: false   # true = deepseek-reasoner，false = deepseek-chat
 # mermaid配置
 mermaid:
   puppeteer-config-path: D:\IDEAProject\AICodeBackend\puppeteer-config.json
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
