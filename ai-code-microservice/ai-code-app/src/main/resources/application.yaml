@@ -1,7 +1,7 @@
 spring:
   #   应用名称
   application:
-    name: ai-code-user
+    name: ai-code-app
   #    MySQL配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

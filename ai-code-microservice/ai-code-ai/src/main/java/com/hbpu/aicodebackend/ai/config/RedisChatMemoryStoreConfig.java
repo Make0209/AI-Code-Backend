@@ -2,48 +2,29 @@ package com.hbpu.aicodebackend.ai.config;
 
 import dev.langchain4j.community.store.memory.chat.redis.RedisChatMemoryStore;
 import dev.langchain4j.community.store.memory.chat.redis.StoreType;
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * RedisChatMemoryStore配置类，LangChain4j官方的链接Redis的配置类
+ * RedisChatMemoryStore configuration.
  */
 @Configuration
-@ConfigurationProperties(prefix = "langchain4j.community.redis")
-@Data
 public class RedisChatMemoryStoreConfig {
 
     /**
-     * Redis的主机地址
-     */
-    private String host;
-    /**
-     * Redis的端口号
-     */
-    private int port;
-    /**
-     * Redis的密码
-     */
-    private String password;
-    /**
-     * Redis的过期时间
-     */
-    private long ttl;
-
-    /**
-     * 创建RedisChatMemoryStore
-     * @return RedisChatMemoryStore
+     * Create RedisChatMemoryStore using the standard Spring Redis configuration.
      */
     @Bean
-    public RedisChatMemoryStore redisChatMemoryStore() {
+    public RedisChatMemoryStore redisChatMemoryStore(RedisProperties redisProperties,
+                                                     @Value("${langchain4j.community.redis.ttl:0}") long ttl) {
         return RedisChatMemoryStore.builder()
-                .host(host)
-                .port(port)
+                .host(redisProperties.getHost())
+                .port(redisProperties.getPort())
                 .user("default")
                 .storeType(StoreType.STRING)
-                .password(password)
+                .password(redisProperties.getPassword())
                 .ttl(ttl)
                 .build();
     }

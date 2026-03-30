@@ -1,0 +1,12 @@
+spring:
+  #   应用名称
+  application:
+    name: ai-code-screenshot
+  #  开启本地配置文件
+  profiles:
+    active: local
+#    服务器配置
+server:
+  port: 8127
+  servlet:
+    context-path: /api

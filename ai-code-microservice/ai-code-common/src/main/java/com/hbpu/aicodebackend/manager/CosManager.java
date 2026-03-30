@@ -5,75 +5,78 @@ import com.qcloud.cos.COSClient;
 import com.qcloud.cos.exception.CosClientException;
 import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 
 /**
- * COS对象存储管理器
+ * COS object storage manager.
  */
 @Component
-@ConditionalOnBean(TencentCosConfig.class)
 @Slf4j
 public class CosManager {
 
-    @Resource
-    private TencentCosConfig tencentCosConfig;
+    private final TencentCosConfig tencentCosConfig;
 
-    @Resource
-    private COSClient cosClient;
+    private final COSClient cosClient;
 
-    @Value("${tencent.cos.bucketName}")
-    private String bucketName; // Bucket名称
+    @Value("${tencent.cos.bucketName:}")
+    private String bucketName;
+
+    public CosManager(ObjectProvider<TencentCosConfig> tencentCosConfigProvider,
+                      ObjectProvider<COSClient> cosClientProvider) {
+        this.tencentCosConfig = tencentCosConfigProvider.getIfAvailable();
+        this.cosClient = cosClientProvider.getIfAvailable();
+    }
 
     /**
-     * 上传对象
-     *
-     * @param key  唯一键
-     * @param file 文件
-     * @return 上传结果
+     * Upload an object to COS.
      */
     public PutObjectResult putObject(String key, File file) {
+        ensureConfigured();
         PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, file);
         return cosClient.putObject(putObjectRequest);
     }
 
     /**
-     * 上传文件到 COS 并返回访问 URL
-     *
-     * @param key  COS对象键（完整路径）
-     * @param file 要上传的文件
-     * @return 文件的访问URL，失败返回null
+     * Upload a file to COS and return its public URL.
      */
     public String uploadFile(String key, File file) {
-        // 上传文件
         PutObjectResult result = putObject(key, file);
         if (result != null) {
-            // 构建访问URL
             String url = String.format(
                     "https://%s.cos.%s.myqcloud.com/%s",
                     bucketName,
                     tencentCosConfig.getRegion(),
                     key
             );
-            log.info("文件上传COS成功: {} -> {}", file.getName(), url);
+            log.info("File uploaded to COS successfully: {} -> {}", file.getName(), url);
             return url;
-        } else {
-            log.error("文件上传COS失败，返回结果为空");
-            return null;
         }
+        log.error("File upload to COS failed, result is null");
+        return null;
     }
 
     /**
-     * 删除对象
-     *
-     * @param key 文件 key
+     * Delete an object from COS.
      */
     public void deleteObject(String key) throws CosClientException {
+        if (key == null || key.isBlank()) {
+            return;
+        }
+        ensureConfigured();
         cosClient.deleteObject(bucketName, key);
+    }
+
+    private void ensureConfigured() {
+        if (tencentCosConfig == null || cosClient == null || bucketName == null || bucketName.isBlank()) {
+            throw new IllegalStateException(
+                    "Tencent COS is not configured. Please provide tencent.cos.secretId, " +
+                            "tencent.cos.secretKey, tencent.cos.region and tencent.cos.bucketName"
+            );
+        }
     }
 }

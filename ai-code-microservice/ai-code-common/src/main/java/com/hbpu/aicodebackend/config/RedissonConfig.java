@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "spring.data.redis")
+@ConfigurationProperties(prefix = "data.redis")
 @Data
 public class RedissonConfig {
 
