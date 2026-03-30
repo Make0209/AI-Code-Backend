@@ -3,6 +3,7 @@ package com.hbpu.aicodebackend.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.hbpu.aicodebackend.auth.JwtUtil;
 import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.exception.ThrowUtils;
@@ -12,7 +13,7 @@ import com.hbpu.aicodebackend.model.entity.User;
 import com.hbpu.aicodebackend.model.enums.UserRoleEnum;
 import com.hbpu.aicodebackend.model.vo.LoginUserVO;
 import com.hbpu.aicodebackend.model.vo.UserVO;
-import com.hbpu.aicodebackend.security.JwtUtil;
+
 import com.hbpu.aicodebackend.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;

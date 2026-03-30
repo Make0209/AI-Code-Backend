@@ -8,16 +8,16 @@ import com.qcloud.cos.model.PutObjectResult;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 
 /**
  * COS对象存储管理器
- *
- * @author yupi
  */
 @Component
+@ConditionalOnBean(TencentCosConfig.class)
 @Slf4j
 public class CosManager {
 

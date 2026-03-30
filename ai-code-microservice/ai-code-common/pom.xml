@@ -18,24 +18,45 @@
     </properties>
 
     <dependencies>
-        <!--  MyBatis-flex 代码生成器 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.7</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.7</version>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>com.mybatis-flex</groupId>
             <artifactId>mybatis-flex-codegen</artifactId>
             <version>1.11.6</version>
         </dependency>
-        <!--  HikariCP 连接池 -->
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>4.0.3</version>
         </dependency>
-        <!--    腾讯云对象存储依赖    -->
-        <!-- Source: https://mvnrepository.com/artifact/com.qcloud/cos_api -->
         <dependency>
             <groupId>com.qcloud</groupId>
             <artifactId>cos_api</artifactId>
             <version>5.6.263</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--Redisson依赖，用于直接从Java实现分布式锁等复杂Redis操作-->
+        <!-- Source: https://mvnrepository.com/artifact/org.redisson/redisson -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.52.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
