@@ -1,4 +1,4 @@
-package com.hbpu.aicodebackend.monitor;
+package com.hbpu.aicodebackend.ai.monitor;
 
 import dev.langchain4j.model.chat.listener.ChatModelErrorContext;
 import dev.langchain4j.model.chat.listener.ChatModelListener;

@@ -1,4 +1,4 @@
-package com.hbpu.aicodebackend.monitor;
+package com.hbpu.aicodebackend.ai.monitor;
 
 import lombok.extern.slf4j.Slf4j;
 

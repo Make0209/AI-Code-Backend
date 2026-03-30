@@ -17,4 +17,58 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <!--    langchain4j Spring Boot启动器    -->
+        <!-- Source: https://mvnrepository.com/artifact/dev.langchain4j/langchain4j-open-ai-spring-boot-starter -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
+            <version>1.12.2-beta22</version>
+        </dependency>
+        <!--    langchain4j 核心依赖    -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>1.12.1</version>
+        </dependency>
+        <!--LangChain4j的Flux流式传输依赖，用于处理Reactor的Flux流-->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-reactor</artifactId>
+            <version>1.12.1-beta21</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--    LangChain4j 通过Redis实现AI聊天上下文持久化    -->
+        <!-- Source: https://mvnrepository.com/artifact/dev.langchain4j/langchain4j-community-redis-spring-boot-starter -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-community-redis-spring-boot-starter</artifactId>
+            <version>1.12.1-beta21</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.hbpu</groupId>
+            <artifactId>ai-code-model</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hbpu</groupId>
+            <artifactId>ai-code-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!--    监控依赖    -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

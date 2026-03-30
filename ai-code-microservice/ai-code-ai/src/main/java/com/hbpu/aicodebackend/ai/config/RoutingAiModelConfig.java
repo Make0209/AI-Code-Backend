@@ -1,4 +1,4 @@
-package com.hbpu.aicodebackend.config;
+package com.hbpu.aicodebackend.ai.config;
 
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;

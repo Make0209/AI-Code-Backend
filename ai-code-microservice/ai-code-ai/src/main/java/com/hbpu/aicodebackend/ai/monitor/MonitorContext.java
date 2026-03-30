@@ -1,4 +1,4 @@
-package com.hbpu.aicodebackend.monitor;
+package com.hbpu.aicodebackend.ai.monitor;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

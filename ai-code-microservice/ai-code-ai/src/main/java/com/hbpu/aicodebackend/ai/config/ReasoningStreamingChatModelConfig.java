@@ -1,6 +1,7 @@
-package com.hbpu.aicodebackend.config;
+package com.hbpu.aicodebackend.ai.config;
 
-import com.hbpu.aicodebackend.monitor.AiModelMonitorListener;
+
+import com.hbpu.aicodebackend.ai.monitor.AiModelMonitorListener;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import jakarta.annotation.Resource;

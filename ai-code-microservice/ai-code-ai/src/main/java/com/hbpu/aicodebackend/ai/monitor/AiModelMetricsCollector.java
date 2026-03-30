@@ -1,4 +1,4 @@
-package com.hbpu.aicodebackend.monitor;
+package com.hbpu.aicodebackend.ai.monitor;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

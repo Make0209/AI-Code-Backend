@@ -18,21 +18,27 @@
     </properties>
 
     <dependencies>
+        <!--==========JWT依赖，包含api和具体实现类，以及JSON处理==========-->
+        <!-- 公共 API：编译时就需要 -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.12.7</version>
+            <version>0.13.0</version>
         </dependency>
+
+        <!-- 实现模块：运行时需要 -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.12.7</version>
+            <version>0.13.0</version>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- JSON 序列化 / 反序列化扩展（使用 Jackson） -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.12.7</version>
+            <version>0.13.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

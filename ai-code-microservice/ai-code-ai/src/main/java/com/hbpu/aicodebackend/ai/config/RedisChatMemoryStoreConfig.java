@@ -1,4 +1,4 @@
-package com.hbpu.aicodebackend.config;
+package com.hbpu.aicodebackend.ai.config;
 
 import dev.langchain4j.community.store.memory.chat.redis.RedisChatMemoryStore;
 import dev.langchain4j.community.store.memory.chat.redis.StoreType;
