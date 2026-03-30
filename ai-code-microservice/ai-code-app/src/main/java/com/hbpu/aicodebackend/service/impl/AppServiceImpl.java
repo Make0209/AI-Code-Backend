@@ -6,21 +6,19 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.hbpu.aicodebackend.ai.AiCodeGenTypeRoutingServiceFactory;
-import com.hbpu.aicodebackend.core.AiCodeGeneratorFacade;
-import com.hbpu.aicodebackend.core.builder.VueProjectBuilder;
-import com.hbpu.aicodebackend.core.handler.StreamHandlerExecutor;
-import com.hbpu.aicodebackend.mapper.AppMapper;
-import com.hbpu.aicodebackend.service.AppService;
-import com.hbpu.aicodebackend.service.ChatHistoryService;
 import com.hbpu.aicodebackend.ai.model.CodeGenRoutingResult;
 import com.hbpu.aicodebackend.ai.monitor.MonitorContext;
 import com.hbpu.aicodebackend.ai.monitor.MonitorContextHolder;
 import com.hbpu.aicodebackend.constant.AppConstant;
+import com.hbpu.aicodebackend.core.AiCodeGeneratorFacade;
+import com.hbpu.aicodebackend.core.builder.VueProjectBuilder;
+import com.hbpu.aicodebackend.core.handler.StreamHandlerExecutor;
 import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.exception.ThrowUtils;
 import com.hbpu.aicodebackend.innerservice.InnerScreenshotService;
 import com.hbpu.aicodebackend.innerservice.InnerUserService;
+import com.hbpu.aicodebackend.mapper.AppMapper;
 import com.hbpu.aicodebackend.model.dto.app.AppAddRequest;
 import com.hbpu.aicodebackend.model.dto.app.AppQueryRequest;
 import com.hbpu.aicodebackend.model.entity.App;
@@ -29,10 +27,13 @@ import com.hbpu.aicodebackend.model.enums.ChatHistoryMessageTypeEnum;
 import com.hbpu.aicodebackend.model.enums.CodeGenTypeEnum;
 import com.hbpu.aicodebackend.model.vo.AppVO;
 import com.hbpu.aicodebackend.model.vo.UserVO;
+import com.hbpu.aicodebackend.service.AppService;
+import com.hbpu.aicodebackend.service.ChatHistoryService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -56,11 +57,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppService {
 
-    @Resource
-    @Lazy
+    @DubboReference
     private InnerUserService userService;
 
     @Resource
+    @Lazy
     private AiCodeGeneratorFacade aiCodeGeneratorFacade;
 
     @Resource
@@ -72,8 +73,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     @Resource
     private VueProjectBuilder vueProjectBuilder;
 
-    @Resource
-    @Lazy
+    @DubboReference
     private InnerScreenshotService screenshotService;
 
     @Resource

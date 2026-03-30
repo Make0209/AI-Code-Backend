@@ -19,7 +19,7 @@ spring:
     active: local
 #    服务器配置
 server:
-  port: 8124
+  port: 8128
   servlet:
     context-path: /api
 # springdoc-openapi
@@ -32,3 +32,19 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+# Dubbo
+dubbo:
+  application:
+    name: ai-code-app
+    qos-enable: false
+  registry:
+    address: nacos://127.0.0.1:8848?username=nacos&password=nacos
+    register-mode: instance
+  protocol:
+    name: tri
+    port: 50053
+  consumer:
+    timeout: 120000
+  provider:
+    timeout: 120000
+

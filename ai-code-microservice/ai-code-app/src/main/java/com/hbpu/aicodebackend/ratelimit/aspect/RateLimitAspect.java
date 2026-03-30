@@ -1,13 +1,15 @@
 package com.hbpu.aicodebackend.ratelimit.aspect;
 
-import com.hbpu.aicodebackend.ratelimit.annotation.RateLimit;
+import com.hbpu.aicodebackend.auth.AuthUtils;
 import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.innerservice.InnerUserService;
 import com.hbpu.aicodebackend.model.entity.User;
+import com.hbpu.aicodebackend.ratelimit.annotation.RateLimit;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -15,7 +17,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RateType;
 import org.redisson.api.RedissonClient;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -32,8 +33,7 @@ import java.time.Duration;
 public class RateLimitAspect {
     @Resource
     private RedissonClient redissonClient;
-    @Resource
-    @Lazy
+    @DubboReference
     private InnerUserService userService;
 
     /**
@@ -85,7 +85,7 @@ public class RateLimitAspect {
                     ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
                     if (attributes != null) {
                         HttpServletRequest request = attributes.getRequest();
-                        User loginUser = InnerUserService.getLoginUser(request);
+                        User loginUser = userService.getLoginUser(AuthUtils.extractToken(request));
                         keyBuilder.append("user:").append(loginUser.getId());
                     } else {
                         // 无法获取请求上下文，使用IP限流

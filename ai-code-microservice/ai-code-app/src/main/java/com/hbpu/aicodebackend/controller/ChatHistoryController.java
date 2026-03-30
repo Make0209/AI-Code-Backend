@@ -1,7 +1,7 @@
 package com.hbpu.aicodebackend.controller;
 
-import com.hbpu.aicodebackend.service.ChatHistoryService;
 import com.hbpu.aicodebackend.annotation.AuthCheck;
+import com.hbpu.aicodebackend.auth.AuthUtils;
 import com.hbpu.aicodebackend.common.BaseResponse;
 import com.hbpu.aicodebackend.common.ResultUtils;
 import com.hbpu.aicodebackend.constant.UserConstant;
@@ -11,6 +11,7 @@ import com.hbpu.aicodebackend.innerservice.InnerUserService;
 import com.hbpu.aicodebackend.model.dto.chathistory.ChatHistoryQueryRequest;
 import com.hbpu.aicodebackend.model.entity.ChatHistory;
 import com.hbpu.aicodebackend.model.entity.User;
+import com.hbpu.aicodebackend.service.ChatHistoryService;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,7 +21,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.context.annotation.Lazy;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -37,10 +38,9 @@ public class ChatHistoryController {
 
     @Resource
     private ChatHistoryService chatHistoryService;
-
-    @Resource
-    @Lazy
+    @DubboReference
     private InnerUserService userService;
+
 
     /**
      * 分页查询某个应用的对话历史（游标查询）
@@ -62,7 +62,7 @@ public class ChatHistoryController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) LocalDateTime lastCreateTime,
             HttpServletRequest request) {
-        User loginUser = InnerUserService.getLoginUser(request);
+        User loginUser = userService.getLoginUser(AuthUtils.extractToken(request));
         Page<ChatHistory> result = chatHistoryService.listAppChatHistoryByPage(
                 appId, pageSize, lastCreateTime, loginUser);
         return ResultUtils.success(result);

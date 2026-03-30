@@ -2,18 +2,18 @@ package com.hbpu.aicodebackend.aop;
 
 
 import com.hbpu.aicodebackend.annotation.AuthCheck;
+import com.hbpu.aicodebackend.auth.AuthUtils;
 import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.exception.ThrowUtils;
 import com.hbpu.aicodebackend.innerservice.InnerUserService;
 import com.hbpu.aicodebackend.model.entity.User;
 import com.hbpu.aicodebackend.model.enums.UserRoleEnum;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -22,10 +22,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Aspect
 @Component
 public class AuthInterceptor {
-    @Resource
-    @Lazy
-    private InnerUserService userService;
 
+    @DubboReference
+    private InnerUserService userService;
 
     @Around("@annotation(authCheck)")
     public Object doIntercept(ProceedingJoinPoint joinPoint, AuthCheck authCheck) throws Throwable {
@@ -42,7 +41,7 @@ public class AuthInterceptor {
         //将请求属性类型转换成Servlet并获取request用户请求
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
         //根据请求获取当前用户
-        User currentUser = InnerUserService.getLoginUser(request);
+        User currentUser = userService.getLoginUser(AuthUtils.extractToken(request));
         //利用当前用户信息取得当前用户的权限值
         String userRole = currentUser.getUserRole();
         //根据用户权限值获得对应的权限枚举类对象

@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.hbpu.aicodebackend.auth.JwtUtil;
+import com.hbpu.aicodebackend.auth.CurrentUser;
 import com.hbpu.aicodebackend.exception.BusinessException;
 import com.hbpu.aicodebackend.exception.ErrorCode;
 import com.hbpu.aicodebackend.exception.ThrowUtils;
@@ -18,6 +19,7 @@ import com.hbpu.aicodebackend.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import io.jsonwebtoken.Claims;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMapCache;
@@ -41,11 +43,9 @@ import java.util.stream.Collectors;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     public static final String REDIS_KEY = "ai-code:user:login:token:%s";
-    private final RedissonClient redisson;
 
-    public UserServiceImpl(RedissonClient redisson) {
-        this.redisson = redisson;
-    }
+    @Resource
+    private RedissonClient redisson;
 
 
     /**
@@ -132,7 +132,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LoginUserVO userLoginVO = new LoginUserVO();
         BeanUtils.copyProperties(user, userLoginVO);
         //为当前用户生成唯一token
-        String token = JwtUtil.generateJwt(userAccount);
+        CurrentUser currentUser = CurrentUser.builder()
+                                             .userId(user.getId())
+                                             .userAccount(user.getUserAccount())
+                                             .userRole(user.getUserRole())
+                                             .tokenVersion(1)
+                                             .build();
+        String token = JwtUtil.generateJwt(currentUser, "HBPU_AI_CODE_PROJECT_SECRET_KEY_FOR_JWT_2026", 7);
         //将token放入响应体中
         userLoginVO.setToken(token);
         // 使用用户id拼接来组成独立的每个key
@@ -178,105 +184,115 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return user;
     }
 
-/**
- * 用户注销
- *
- * @param request 请求
- * @return 是否成功
- */
-@Override
-public Boolean userLogout(HttpServletRequest request) {
-    // 获取请求头中的Authorization，因为它一般存储着token
-    String authHeader = request.getHeader("Authorization");
-    // 判断是否为空，且其中内容是否正确
-    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-        // 去掉 "Bearer " 前缀
-        String token = authHeader.substring(7);
-        // 解析token
+    /**
+     * 用户注销
+     *
+     * @param request 请求
+     * @return 是否成功
+     */
+    @Override
+    public User getLoginUser(String token) {
+        ThrowUtils.throwIf(StrUtil.isBlank(token), new BusinessException(ErrorCode.PARAMS_ERROR, "token 解析失败或者未携带token"));
         Claims claims = JwtUtil.parseToken(token);
-        // 使用token中负载的主题来拼接redis的key
         String redisKey = String.format(REDIS_KEY, claims.getSubject());
-        // 通过key来获取相应的map并进行删除
-        boolean delete = redisson.getMapCache(redisKey).delete();
-        if (!delete) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注销失败！");
+        User user = (User) redisson.getMapCache(redisKey).get("object");
+        ThrowUtils.throwIf(user == null, new BusinessException(ErrorCode.NOT_LOGIN_ERROR));
+        return user;
+    }
+
+    @Override
+    public Boolean userLogout(HttpServletRequest request) {
+        // 获取请求头中的Authorization，因为它一般存储着token
+        String authHeader = request.getHeader("Authorization");
+        // 判断是否为空，且其中内容是否正确
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            // 去掉 "Bearer " 前缀
+            String token = authHeader.substring(7);
+            // 解析token
+            Claims claims = JwtUtil.parseToken(token);
+            // 使用token中负载的主题来拼接redis的key
+            String redisKey = String.format(REDIS_KEY, claims.getSubject());
+            // 通过key来获取相应的map并进行删除
+            boolean delete = redisson.getMapCache(redisKey).delete();
+            if (!delete) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注销失败！");
+            }
+            return true;
+        } else {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "获取token时出现错误！");
         }
-        return true;
-    } else {
-        throw new BusinessException(ErrorCode.PARAMS_ERROR, "获取token时出现错误！");
     }
-}
 
-/**
- * 获取脱敏后的用户信息
- *
- * @param user 用户信息
- * @return 脱敏后的用户信息
- */
-@Override
-public UserVO getUserVO(User user) {
-    if (user == null) {
-        return null;
+    /**
+     * 获取脱敏后的用户信息
+     *
+     * @param user 用户信息
+     * @return 脱敏后的用户信息
+     */
+    @Override
+    public UserVO getUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVO userVO = new UserVO();
+        BeanUtil.copyProperties(user, userVO);
+        return userVO;
     }
-    UserVO userVO = new UserVO();
-    BeanUtil.copyProperties(user, userVO);
-    return userVO;
-}
 
-/**
- * 获取脱敏后的用户信息列表
- *
- * @param userList 用户信息列表
- * @return 脱敏后的用户信息列表
- */
-@Override
-public List<UserVO> getUserVOList(List<User> userList) {
-    if (CollUtil.isEmpty(userList)) {
-        return new ArrayList<>();
+    /**
+     * 获取脱敏后的用户信息列表
+     *
+     * @param userList 用户信息列表
+     * @return 脱敏后的用户信息列表
+     */
+    @Override
+    public List<UserVO> getUserVOList(List<User> userList) {
+        if (CollUtil.isEmpty(userList)) {
+            return new ArrayList<>();
+        }
+        return userList.stream().map(this::getUserVO).collect(Collectors.toList());
     }
-    return userList.stream().map(this::getUserVO).collect(Collectors.toList());
-}
 
-/**
- * 获取查询条件
- *
- * @param userQueryRequest 查询条件
- * @return 查询条件
- */
-@Override
-public QueryWrapper getQueryWrapper(UserQueryRequest userQueryRequest) {
-    if (userQueryRequest == null) {
-        throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+    /**
+     * 获取查询条件
+     *
+     * @param userQueryRequest 查询条件
+     * @return 查询条件
+     */
+    @Override
+    public QueryWrapper getQueryWrapper(UserQueryRequest userQueryRequest) {
+        if (userQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        Long id = userQueryRequest.getId();
+        String userAccount = userQueryRequest.getUserAccount();
+        String userName = userQueryRequest.getUserName();
+        String userProfile = userQueryRequest.getUserProfile();
+        String userRole = userQueryRequest.getUserRole();
+        String sortField = userQueryRequest.getSortField();
+        String sortOrder = userQueryRequest.getSortOrder();
+        return QueryWrapper.create()
+                           .eq("id", id)
+                           .eq("userRole", userRole)
+                           .like("userAccount", userAccount)
+                           .like("userName", userName)
+                           .like("userProfile", userProfile)
+                           .orderBy(sortField, "ascend".equals(sortOrder));
     }
-    Long id = userQueryRequest.getId();
-    String userAccount = userQueryRequest.getUserAccount();
-    String userName = userQueryRequest.getUserName();
-    String userProfile = userQueryRequest.getUserProfile();
-    String userRole = userQueryRequest.getUserRole();
-    String sortField = userQueryRequest.getSortField();
-    String sortOrder = userQueryRequest.getSortOrder();
-    return QueryWrapper.create()
-                       .eq("id", id)
-                       .eq("userRole", userRole)
-                       .like("userAccount", userAccount)
-                       .like("userName", userName)
-                       .like("userProfile", userProfile)
-                       .orderBy(sortField, "ascend".equals(sortOrder));
-}
 
 
-/**
- * 获取加密密码
- *
- * @param userPassword 用户密码
- * @return 加密后的密码
- */
-@Override
-public String getEncryptPassword(String userPassword) {
-    // 盐值，混淆密码
-    final String SALT = "Kefan";
-    return DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
-}
+    /**
+     * 获取加密密码
+     *
+     * @param userPassword 用户密码
+     * @return 加密后的密码
+     */
+    @Override
+    public String getEncryptPassword(String userPassword) {
+        // 盐值，混淆密码
+        final String SALT = "Kefan";
+        return DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+    }
 
 
 }

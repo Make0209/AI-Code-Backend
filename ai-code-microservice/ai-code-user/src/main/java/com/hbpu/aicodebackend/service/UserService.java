@@ -50,6 +50,8 @@ public interface UserService extends IService<User> {
      */
     User getLoginUser(HttpServletRequest request);
 
+    User getLoginUser(String token);
+
     /**
      * 用户注销方法
      *

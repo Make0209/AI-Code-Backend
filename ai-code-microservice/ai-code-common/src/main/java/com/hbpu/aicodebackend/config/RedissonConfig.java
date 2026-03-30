@@ -1,46 +1,45 @@
 package com.hbpu.aicodebackend.config;
 
-import lombok.Data;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.redisson.config.SingleServerConfig;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Redisson configuration based on Spring Boot Redis properties.
+ */
 @Configuration
-@ConfigurationProperties(prefix = "data.redis")
-@Data
+@ConditionalOnClass(RedisProperties.class)
+@ConditionalOnProperty(prefix = "spring.data.redis", name = "host")
 public class RedissonConfig {
 
-    private String host;
-    private Integer port;
-    private String password;
-
     @Bean
-    public RedissonClient redissonClient() {
-        //设置redis的地址
-        String redisAddress = String.format("redis://%s:%d", host, port);
-        // 创建新的配置实例
+    @ConditionalOnMissingBean(RedissonClient.class)
+    public RedissonClient redissonClient(RedisProperties redisProperties) {
+        String redisAddress = String.format("redis://%s:%d", redisProperties.getHost(), redisProperties.getPort());
+
         Config config = new Config();
-        // 设置使用单服务并设置redis地址和数据库
-        config.useSingleServer()
-              .setAddress(redisAddress)
-              .setDatabase(2)
-              .setPassword(password)
-              // 设置连接池大小，即最大连接数
-              .setConnectionPoolSize(10)
-              // 设置最小空闲连接数
-              .setConnectionMinimumIdleSize(1)
-              // 设置空闲连接的超时时间
-              .setIdleConnectionTimeout(30000)
-              // 设置连接超时时间
-              .setConnectTimeout(5000)
-              // 设置操作超时时间
-              .setTimeout(3000)
-              // 设置重试次数
-              .setRetryAttempts(3);
-        // 返回新的RedissonClient对象
+        SingleServerConfig singleServerConfig = config.useSingleServer()
+                .setAddress(redisAddress)
+                .setDatabase(2)
+                .setConnectionPoolSize(10)
+                .setConnectionMinimumIdleSize(1)
+                .setIdleConnectionTimeout(30000)
+                .setConnectTimeout(5000)
+                .setTimeout(3000)
+                .setRetryAttempts(3);
+
+        String password = redisProperties.getPassword();
+        if (password != null && !password.isBlank()) {
+            singleServerConfig.setPassword(password);
+        }
+
         return Redisson.create(config);
     }
 }

@@ -99,6 +99,10 @@ public final class JwtUtil {
                 .build();
     }
 
+    public static CurrentUser getCurrentUser(String token) {
+        return getCurrentUser(token, DEFAULT_SECRET_KEY);
+    }
+
     public static String getUserAccount(String token) {
         Claims claims = parseToken(token, DEFAULT_SECRET_KEY);
         String userAccount = claims.get(JwtClaimsConstant.USER_ACCOUNT, String.class);
