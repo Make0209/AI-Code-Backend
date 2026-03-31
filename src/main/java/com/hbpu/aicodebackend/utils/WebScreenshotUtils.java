@@ -13,8 +13,8 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ import java.util.UUID;
 @Component
 public class WebScreenshotUtils {
 
-    private WebDriver webDriver;
+    private volatile WebDriver webDriver;
     private final Object lock = new Object();
 
     // ✅ 懒加载，第一次用的时候才初始化，失败了不影响其他功能
@@ -38,7 +38,7 @@ public class WebScreenshotUtils {
         if (webDriver == null) {
             synchronized (lock) {
                 if (webDriver == null) {
-                    webDriver = initEdgeDriver(1600, 900);
+                    webDriver = initChromeDriver(1600, 900);
                 }
             }
         }
@@ -101,12 +101,12 @@ public class WebScreenshotUtils {
         webDriver = null;
     }
 
-    private WebDriver initEdgeDriver(int width, int height) {
+    private WebDriver initChromeDriver(int width, int height) {
         try {
-            // ✅ Edge 驱动从微软服务器下载，国内直接能访问，不需要镜像
-            WebDriverManager.edgedriver().setup();
+            // ✅ 服务器装的是 Google Chrome，用 chromedriver
+            WebDriverManager.chromedriver().setup();
 
-            EdgeOptions options = new EdgeOptions();
+            ChromeOptions options = new ChromeOptions();
             options.addArguments("--headless");
             options.addArguments("--disable-gpu");
             options.addArguments("--no-sandbox");
@@ -114,17 +114,17 @@ public class WebScreenshotUtils {
             options.addArguments(String.format("--window-size=%d,%d", width, height));
             options.addArguments("--disable-extensions");
             options.addArguments(
-                    "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0"
+                    "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
             );
 
-            WebDriver driver = new EdgeDriver(options);
+            WebDriver driver = new ChromeDriver(options);  // ✅ ChromeDriver
             driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-            log.info("Edge WebDriver 初始化成功");
+            log.info("Chrome WebDriver 初始化成功");
             return driver;
         } catch (Exception e) {
-            log.error("初始化 Edge 浏览器失败", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "初始化 Edge 浏览器失败");
+            log.error("初始化 Chrome 浏览器失败", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "初始化 Chrome 浏览器失败");
         }
     }
 

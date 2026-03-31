@@ -119,7 +119,7 @@ public class AiCodeGeneratorServiceFactory {
                                 // 添加护轨，用于过滤潜在危险的输入
                                 .inputGuardrails(new PromptSafetyInputGuardrail())
                                 // 设置最大工具调用次数
-                                .maxSequentialToolsInvocations(60)
+//                                .maxSequentialToolsInvocations(60)
                                 .build();
             }
             // HTML 和多文件生成使用默认模型

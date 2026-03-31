@@ -120,12 +120,14 @@ public class VueProjectBuilder {
     private boolean executeCommand(File workingDir, String command, int timeoutSeconds) {
         try {
             log.info("在目录 {} 中执行命令: {}", workingDir.getAbsolutePath(), command);
-            Process process = RuntimeUtil.exec(
-                    null,
-                    workingDir,
-                    command.split("\\s+") // 命令分割为数组
-            );
-            // 等待进程完成，设置超时
+
+            // ✅ 通过 shell 执行，解决环境变量继承问题
+            String[] cmd = isWindows()
+                    ? new String[]{"cmd", "/c", command}
+                    : new String[]{"/bin/bash", "-c", command};
+
+            Process process = Runtime.getRuntime().exec(cmd, null, workingDir);
+
             boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
             if (!finished) {
                 log.error("命令执行超时（{}秒），强制终止进程", timeoutSeconds);
@@ -137,7 +139,9 @@ public class VueProjectBuilder {
                 log.info("命令执行成功: {}", command);
                 return true;
             } else {
-                log.error("命令执行失败，退出码: {}", exitCode);
+                // ✅ 打印错误输出，方便排查
+                String errorOutput = new String(process.getErrorStream().readAllBytes());
+                log.error("命令执行失败，退出码: {}, 错误: {}", exitCode, errorOutput);
                 return false;
             }
         } catch (Exception e) {
